@@ -75,7 +75,7 @@
 
         <div class="info-line">
             <h3>Buy HABToken</h3>
-            <p>1 ETH = 1,000,000 HABToken</p>
+            <p>1 ETH = <span id="tokensPerEtherDisplay">1,000,000</span> HABToken</p>
         </div>
 
         <input type="text" id="ethAmount" placeholder="Enter ETH amount">
@@ -97,39 +97,21 @@
             {
                 "inputs": [],
                 "name": "contractEtherBalance",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
                 "stateMutability": "view",
                 "type": "function"
             },
             {
                 "inputs": [],
                 "name": "contractTokenBalance",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
                 "stateMutability": "view",
                 "type": "function"
             },
             {
                 "inputs": [],
                 "name": "tokensPerEther",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
                 "stateMutability": "view",
                 "type": "function"
             }
@@ -214,9 +196,9 @@
 
         async function loadTokensPerEther() {
             try {
-                tokensPerEther = await crowdsaleContract.methods.tokensPerEther().call();
-                tokensPerEther = web3.utils.fromWei(tokensPerEther, 'ether');
-                document.querySelector('.info-line p').innerText = `1 ETH = ${tokensPerEther} HABToken`;
+                const tokensPerEtherWei = await crowdsaleContract.methods.tokensPerEther().call();
+                tokensPerEther = web3.utils.fromWei(tokensPerEtherWei, 'ether');  // 이더 단위로 환산
+                document.getElementById('tokensPerEtherDisplay').innerText = tokensPerEther;  // 화면에 표시
             } catch (error) {
                 console.error("Error fetching tokensPerEther:", error);
             }
@@ -224,10 +206,9 @@
 
         document.getElementById('ethAmount').addEventListener('input', () => {
             const ethAmount = parseFloat(document.getElementById('ethAmount').value);
-            if (ethAmount && tokensPerEther) {
+            if (!isNaN(ethAmount) && tokensPerEther) {
                 const habAmount = ethAmount * tokensPerEther;
-                const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(18);
-                document.getElementById('habAmount').innerText = habDisplay;
+                document.getElementById('habAmount').innerText = habAmount.toFixed(0);  // 소수점 없이 정수로 표시
             } else {
                 document.getElementById('habAmount').innerText = "0";
             }
@@ -245,7 +226,8 @@
                     from: account,
                     value: web3.utils.toWei(ethAmount, 'ether')
                 });
-                alert(`Successfully bought ${ethAmount * tokensPerEther} HABToken!`);
+                const habAmount = ethAmount * tokensPerEther;
+                alert(`Successfully bought ${habAmount.toFixed(0)} HABToken!`);
                 updateBalances();
                 updateRemainingTokens();
             } catch (error) {
