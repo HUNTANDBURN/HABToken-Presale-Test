@@ -239,6 +239,7 @@
 
             if (ethAmount >= 0.000001) {
                 const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
+                const habTokensToBuy = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
 
                 try {
                     const result = await crowdsaleContract.methods.buyTokens().send({
@@ -246,6 +247,10 @@
                         value: ethValue
                     });
 
+                    // Calculate received tokens and log for confirmation
+                    const receivedTokens = habTokensToBuy; 
+                    console.log(`Received ${receivedTokens} HABToken`);
+                    
                     alert("Tokens purchased successfully!");
                     updateBalances();
                     updateRemainingTokens();
