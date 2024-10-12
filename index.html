@@ -216,7 +216,7 @@
             const ethAmount = parseFloat(document.getElementById('ethAmount').value);
             if (ethAmount) {
                 const habAmount = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
-                const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(0);
+                const habDisplay = habAmount.toFixed(0);
                 document.getElementById('habAmount').innerText = habDisplay;
             } else {
                 document.getElementById('habAmount').innerText = "0";
@@ -239,15 +239,18 @@
 
             if (ethAmount >= 0.000001) {
                 const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
-                const habTokensToBuy = Math.floor(ethAmount * 1000000); // 1 ETH = 1,000,000 HABToken
+                const habTokensToBuy = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
 
                 try {
                     const result = await crowdsaleContract.methods.buyTokens().send({
                         from: account,
-                        value: ethValue
+                        value: ethValue,
+                        // 트랜잭션에서 받을 토큰 수를 설정
+                        gasPrice: web3.utils.toWei('20', 'gwei'),
+                        gas: 3000000,
                     });
 
-                    alert(`You will receive: ${habTokensToBuy} HABToken`);
+                    alert(`You will receive: ${habTokensToBuy.toFixed(0)} HABToken`); // Show the correct amount of tokens
                     updateBalances();
                     updateRemainingTokens();
                 } catch (error) {
