@@ -213,10 +213,14 @@
         }
 
         document.getElementById('ethAmount').addEventListener('input', async () => {
-            const ethAmount = document.getElementById('ethAmount').value;
-            const habAmount = ethAmount * 1000000;
-            const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(18);
-            document.getElementById('habAmount').innerText = habDisplay;
+            const ethAmount = parseFloat(document.getElementById('ethAmount').value);
+            if (ethAmount) {
+                const habAmount = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
+                const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(18);
+                document.getElementById('habAmount').innerText = habDisplay;
+            } else {
+                document.getElementById('habAmount').innerText = "0";
+            }
         });
 
         document.getElementById('buyTokens').addEventListener('click', async () => {
@@ -225,39 +229,32 @@
                 return;
             }
 
-            let ethAmount = document.getElementById('ethAmount').value;
+            let ethAmount = parseFloat(document.getElementById('ethAmount').value);
 
             if (ethAmount < 0.000001) {
                 alert("You must purchase at least 0.000001 ETH worth of HABToken.");
                 ethAmount = 0.000001;
                 document.getElementById('ethAmount').value = ethAmount;
-                const habAmount = ethAmount * 1000000;
-                document.getElementById('habAmount').innerText = habAmount.toFixed(18);
             }
 
             if (ethAmount >= 0.000001) {
-                const ethValue = web3.utils.toWei(ethAmount, 'ether');
+                const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
+
                 try {
-                    await crowdsaleContract.methods.buyTokens().send({
+                    const result = await crowdsaleContract.methods.buyTokens().send({
                         from: account,
                         value: ethValue
                     });
+
                     alert("Tokens purchased successfully!");
                     updateBalances();
                     updateRemainingTokens();
                 } catch (error) {
                     console.error("Error purchasing tokens:", error);
+                    alert("Token purchase failed. Please try again.");
                 }
             }
         });
-
-        window.onload = () => {
-            if (typeof web3 !== 'undefined') {
-                web3 = new Web3(window.ethereum);
-                crowdsaleContract = new web3.eth.Contract(crowdsaleAbi, crowdsaleAddress);
-            }
-        };
     </script>
-
 </body>
 </html>
