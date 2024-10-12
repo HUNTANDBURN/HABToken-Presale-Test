@@ -247,10 +247,7 @@
                         value: ethValue
                     });
 
-                    // Log the received tokens
-                    console.log(`Received ${habTokensToBuy} HABToken`);
-                    
-                    alert("Tokens purchased successfully!");
+                    alert(`You will receive: ${habTokensToBuy} HABToken`);
                     updateBalances();
                     updateRemainingTokens();
                 } catch (error) {
