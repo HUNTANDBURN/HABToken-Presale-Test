@@ -196,8 +196,8 @@
         document.getElementById('ethAmount').addEventListener('input', () => {
             const ethAmount = parseFloat(document.getElementById('ethAmount').value);
             if (!isNaN(ethAmount)) {
-                const habAmount = ethAmount * tokensPerEther; // 1 ETH = 1,000,000 HABToken
-                document.getElementById('habAmount').innerText = Math.floor(habAmount); // 소수점 없이 정수로 표시
+                const habAmount = Math.floor(ethAmount * tokensPerEther); // 소수점 없이 정수로 표시
+                document.getElementById('habAmount').innerText = habAmount; // 정수로 표시
             } else {
                 document.getElementById('habAmount').innerText = "0";
             }
