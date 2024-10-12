@@ -120,7 +120,7 @@
         let web3;
         let account;
         let crowdsaleContract;
-        let tokensPerEther = 1000000;  // 기본값으로 설정 (로드 전에 표시)
+        const tokensPerEther = 1000000;  // 1 ETH = 1,000,000 HABToken
 
         document.getElementById('connectWallet').addEventListener('click', async () => {
             if (window.ethereum) {
@@ -131,7 +131,6 @@
                     await switchToSepolia();
                     crowdsaleContract = new web3.eth.Contract(crowdsaleAbi, crowdsaleAddress);
                     document.getElementById('walletAddress').innerText = account;
-                    await loadTokensPerEther();  // 토큰 환율 불러오기
                     updateBalances();
                     updateRemainingTokens();
                 } catch (error) {
@@ -194,21 +193,11 @@
             }
         }
 
-        async function loadTokensPerEther() {
-            try {
-                const tokensPerEtherWei = await crowdsaleContract.methods.tokensPerEther().call();
-                tokensPerEther = web3.utils.fromWei(tokensPerEtherWei, 'ether');  // 이더 단위로 환산
-                document.getElementById('tokensPerEtherDisplay').innerText = tokensPerEther;  // 화면에 표시
-            } catch (error) {
-                console.error("Error fetching tokensPerEther:", error);
-            }
-        }
-
         document.getElementById('ethAmount').addEventListener('input', () => {
             const ethAmount = parseFloat(document.getElementById('ethAmount').value);
-            if (!isNaN(ethAmount) && tokensPerEther) {
-                const habAmount = ethAmount * tokensPerEther;
-                document.getElementById('habAmount').innerText = habAmount.toFixed(0);  // 소수점 없이 정수로 표시
+            if (!isNaN(ethAmount)) {
+                const habAmount = ethAmount * tokensPerEther; // 1 ETH = 1,000,000 HABToken
+                document.getElementById('habAmount').innerText = Math.floor(habAmount); // 소수점 없이 정수로 표시
             } else {
                 document.getElementById('habAmount').innerText = "0";
             }
@@ -221,17 +210,18 @@
                 return;
             }
 
+            const habAmount = Math.floor(parseFloat(ethAmount) * tokensPerEther); // 정수로 변환
+
             try {
                 await crowdsaleContract.methods.buyTokens().send({
                     from: account,
                     value: web3.utils.toWei(ethAmount, 'ether')
                 });
-                const habAmount = ethAmount * tokensPerEther;
-                alert(`Successfully bought ${habAmount.toFixed(0)} HABToken!`);
-                updateBalances();
-                updateRemainingTokens();
+                alert(`${habAmount} HABToken successfully purchased!`);
+                updateBalances(); // 업데이트
             } catch (error) {
-                console.error("Error purchasing tokens:", error);
+                console.error("Error buying tokens:", error);
+                alert("An error occurred while buying tokens. Check the console for more details.");
             }
         });
     </script>
