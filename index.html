@@ -216,7 +216,7 @@
             const ethAmount = parseFloat(document.getElementById('ethAmount').value);
             if (ethAmount) {
                 const habAmount = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
-                const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(18);
+                const habDisplay = habAmount % 1 === 0 ? habAmount : habAmount.toFixed(0);
                 document.getElementById('habAmount').innerText = habDisplay;
             } else {
                 document.getElementById('habAmount').innerText = "0";
@@ -239,7 +239,7 @@
 
             if (ethAmount >= 0.000001) {
                 const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
-                const habTokensToBuy = ethAmount * 1000000; // 1 ETH = 1,000,000 HABToken
+                const habTokensToBuy = Math.floor(ethAmount * 1000000); // 1 ETH = 1,000,000 HABToken
 
                 try {
                     const result = await crowdsaleContract.methods.buyTokens().send({
@@ -247,9 +247,8 @@
                         value: ethValue
                     });
 
-                    // Calculate received tokens and log for confirmation
-                    const receivedTokens = habTokensToBuy; 
-                    console.log(`Received ${receivedTokens} HABToken`);
+                    // Log the received tokens
+                    console.log(`Received ${habTokensToBuy} HABToken`);
                     
                     alert("Tokens purchased successfully!");
                     updateBalances();
