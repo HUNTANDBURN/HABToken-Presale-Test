@@ -234,32 +234,22 @@
         });
 
         document.getElementById('buyTokens').addEventListener('click', async () => {
-            const ethAmount = parseFloat(document.getElementById('ethAmount').value);
-            if (!ethAmount || ethAmount <= 0) {
+            const ethAmount = document.getElementById('ethAmount').value;
+            if (!ethAmount || isNaN(ethAmount)) {
                 alert("Please enter a valid ETH amount.");
                 return;
             }
 
-            const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
-            const habAmount = ethAmount * tokensPerEther;
-
-            if (account) {
-                const maxGasLimit = '5000000'; // Set a high gas limit for safety
-
-                try {
-                    await crowdsaleContract.methods.buyTokens().send({
-                        from: account,
-                        value: ethValue,
-                        gas: maxGasLimit,
-                    });
-
-                    alert(`Successfully purchased ${habAmount} HABToken`);
-                    updateBalances();
-                    updateRemainingTokens();
-                } catch (error) {
-                    console.error("Purchase failed:", error);
-                    alert("Purchase failed. Check the console for more details.");
-                }
+            try {
+                await crowdsaleContract.methods.buyTokens().send({
+                    from: account,
+                    value: web3.utils.toWei(ethAmount, 'ether')
+                });
+                alert(`Successfully bought ${ethAmount * tokensPerEther} HABToken!`);
+                updateBalances();
+                updateRemainingTokens();
+            } catch (error) {
+                console.error("Error purchasing tokens:", error);
             }
         });
     </script>
