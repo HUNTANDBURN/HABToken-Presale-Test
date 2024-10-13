@@ -165,6 +165,8 @@
                 } catch (error) {
                     console.error("Error connecting to wallet:", error);
                 }
+            } else {
+                alert("Please install MetaMask!");
             }
         });
 
@@ -217,37 +219,32 @@
                 document.getElementById('remainingTokens').innerText = remainingTokensFull + " HABToken";
             } catch (error) {
                 console.error("Error fetching remaining tokens:", error);
-                document.getElementById('remainingTokens').innerText = "Error loading";
+                document.getElementById('remainingTokens').innerText = "Error";
             }
         }
 
-        document.getElementById('ethAmount').addEventListener('input', () => {
-            const ethAmount = parseFloat(document.getElementById('ethAmount').value);
-            if (!isNaN(ethAmount)) {
-                const habAmount = ethAmount * tokensPerEther;
-                document.getElementById('habAmount').innerText = habAmount;
-            } else {
-                document.getElementById('habAmount').innerText = 0;
+        document.getElementById('buyTokens').addEventListener('click', async () => {
+            const ethAmount = document.getElementById('ethAmount').value;
+            if (!ethAmount || ethAmount <= 0) {
+                alert("Please enter a valid amount of ETH.");
+                return;
+            }
+
+            const valueInWei = web3.utils.toWei(ethAmount, 'ether');
+            try {
+                await crowdsaleContract.methods.buyTokens().send({ from: account, value: valueInWei });
+                alert("Tokens purchased successfully!");
+                updateBalances();
+                updateRemainingTokens();
+            } catch (error) {
+                console.error("Error purchasing tokens:", error);
             }
         });
 
-        document.getElementById('buyTokens').addEventListener('click', async () => {
+        document.getElementById('ethAmount').addEventListener('input', () => {
             const ethAmount = document.getElementById('ethAmount').value;
-            if (ethAmount && account) {
-                try {
-                    await crowdsaleContract.methods.buyTokens().send({
-                        from: account,
-                        value: web3.utils.toWei(ethAmount, 'ether')
-                    });
-                    alert("Tokens purchased successfully!");
-                    updateBalances();
-                    updateRemainingTokens();
-                } catch (error) {
-                    console.error("Error buying tokens:", error);
-                }
-            } else {
-                alert("Please enter a valid ETH amount and connect your wallet.");
-            }
+            const habAmount = ethAmount * tokensPerEther;
+            document.getElementById('habAmount').innerText = habAmount.toFixed(0);
         });
     </script>
 </body>
