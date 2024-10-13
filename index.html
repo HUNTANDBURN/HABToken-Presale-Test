@@ -159,7 +159,7 @@
                     await switchToSepolia();
                     crowdsaleContract = new web3.eth.Contract(crowdsaleAbi, crowdsaleAddress);
                     tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
-                    document.getElementById('walletAddress').innerText = account;
+                    document.getElementById('walletAddress').innerText = shortenAddress(account);
                     updateBalances();
                     updateRemainingTokens();
                 } catch (error) {
@@ -224,29 +224,45 @@
         }
 
         document.getElementById('buyTokens').addEventListener('click', async () => {
-            const ethAmount = document.getElementById('ethAmount').value;
-            if (!ethAmount || ethAmount <= 0) {
-                alert("Please enter a valid ETH amount.");
+            if (!account) {
+                alert("Please connect your wallet first.");
                 return;
             }
 
-            const weiAmount = web3.utils.toWei(ethAmount, 'ether');
+            const ethAmount = document.getElementById('ethAmount').value;
+            const ethAmountInWei = web3.utils.toWei(ethAmount, 'ether');
+
+            if (parseFloat(ethAmount) < 0.000001) {
+                alert("You must send at least 0.000001 ETH to purchase tokens.");
+                return;
+            }
+
+            const habAmount = (ethAmount * tokensPerEther).toFixed(0);
+            document.getElementById('habAmount').innerText = habAmount;
+
             try {
-                await crowdsaleContract.methods.buyTokens().send({ from: account, value: weiAmount });
-                alert("Tokens purchased successfully!");
+                const tx = await crowdsaleContract.methods.buyTokens().send({
+                    from: account,
+                    value: ethAmountInWei
+                });
+                alert("Transaction successful: " + tx.transactionHash);
                 updateBalances();
                 updateRemainingTokens();
             } catch (error) {
                 console.error("Error buying tokens:", error);
-                alert("Transaction failed!");
+                alert("Transaction failed. Please try again.");
             }
         });
 
-        document.getElementById('ethAmount').addEventListener('input', function() {
-            const ethAmount = this.value;
-            const habAmount = ethAmount * tokensPerEther;
-            document.getElementById('habAmount').innerText = habAmount.toFixed(0);
+        document.getElementById('ethAmount').addEventListener('input', () => {
+            const ethAmount = document.getElementById('ethAmount').value;
+            const habAmount = (ethAmount * tokensPerEther).toFixed(0);
+            document.getElementById('habAmount').innerText = habAmount;
         });
+
+        function shortenAddress(address) {
+            return address.slice(0, 6) + "..." + address.slice(-4);
+        }
     </script>
 </body>
 </html>
