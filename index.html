@@ -166,8 +166,7 @@
                     console.error("Error connecting to wallet:", error);
                 }
             } else {
-                const dappUrl = "https://huntandburn.com"; // DApp URL
-                window.location.href = "https://metamask.app.link/dapp/" + dappUrl;
+                alert("Please install MetaMask!");
             }
         });
 
@@ -226,23 +225,25 @@
 
         document.getElementById('buyTokens').addEventListener('click', async () => {
             const ethAmount = document.getElementById('ethAmount').value;
+            if (!ethAmount || ethAmount <= 0) {
+                alert("Please enter a valid ETH amount.");
+                return;
+            }
+
             const weiAmount = web3.utils.toWei(ethAmount, 'ether');
             try {
-                await crowdsaleContract.methods.buyTokens().send({
-                    from: account,
-                    value: weiAmount
-                });
-                alert("Purchase successful!");
+                await crowdsaleContract.methods.buyTokens().send({ from: account, value: weiAmount });
+                alert("Tokens purchased successfully!");
                 updateBalances();
                 updateRemainingTokens();
             } catch (error) {
                 console.error("Error buying tokens:", error);
-                alert("Purchase failed. Please try again.");
+                alert("Transaction failed!");
             }
         });
 
-        document.getElementById('ethAmount').addEventListener('input', (e) => {
-            const ethAmount = e.target.value;
+        document.getElementById('ethAmount').addEventListener('input', function() {
+            const ethAmount = this.value;
             const habAmount = ethAmount * tokensPerEther;
             document.getElementById('habAmount').innerText = habAmount.toFixed(0);
         });
