@@ -164,13 +164,10 @@
                     updateRemainingTokens();
                 } catch (error) {
                     console.error("Error connecting to wallet:", error);
-                    // Check if the user is on mobile and MetaMask is not detected
-                    if (navigator.userAgent.match(/(iPhone|iPod|Android|ios|ipad|Iphone|Ipad)/)) {
-                        window.location.href = "https://metamask.app.link/dapp/your-dapp-url.com"; // Replace with your dApp URL
-                    }
                 }
             } else {
-                alert("Please install MetaMask!");
+                const dappUrl = "https://huntandburn.com"; // DApp URL
+                window.location.href = "https://metamask.app.link/dapp/" + dappUrl;
             }
         });
 
@@ -223,31 +220,29 @@
                 document.getElementById('remainingTokens').innerText = remainingTokensFull + " HABToken";
             } catch (error) {
                 console.error("Error fetching remaining tokens:", error);
+                document.getElementById('remainingTokens').innerText = "Error";
             }
         }
 
         document.getElementById('buyTokens').addEventListener('click', async () => {
             const ethAmount = document.getElementById('ethAmount').value;
-            if (ethAmount > 0) {
-                try {
-                    const tokensToBuy = ethAmount * tokensPerEther;
-                    await crowdsaleContract.methods.buyTokens().send({
-                        from: account,
-                        value: web3.utils.toWei(ethAmount, 'ether')
-                    });
-                    alert("Tokens bought successfully!");
-                    updateBalances();
-                    updateRemainingTokens();
-                } catch (error) {
-                    console.error("Error buying tokens:", error);
-                }
-            } else {
-                alert("Please enter a valid ETH amount.");
+            const weiAmount = web3.utils.toWei(ethAmount, 'ether');
+            try {
+                await crowdsaleContract.methods.buyTokens().send({
+                    from: account,
+                    value: weiAmount
+                });
+                alert("Purchase successful!");
+                updateBalances();
+                updateRemainingTokens();
+            } catch (error) {
+                console.error("Error buying tokens:", error);
+                alert("Purchase failed. Please try again.");
             }
         });
 
-        document.getElementById('ethAmount').addEventListener('input', (event) => {
-            const ethAmount = event.target.value;
+        document.getElementById('ethAmount').addEventListener('input', (e) => {
+            const ethAmount = e.target.value;
             const habAmount = ethAmount * tokensPerEther;
             document.getElementById('habAmount').innerText = habAmount.toFixed(0);
         });
